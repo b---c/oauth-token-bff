@@ -9,3 +9,9 @@ To build the xml2rfc file and transform it into html:
 `mmark main.md > draft.xml; xml2rfc --html draft.xml`
 
 (you'll need https://github.com/mmarkdown/mmark and https://pypi.org/project/xml2rfc/)
+
+or with the magic of Docker (thanks to Dr. Daniel Fett and https://github.com/oauthstuff/markdown2rfc): 
+
+```bash
+docker run -v `pwd`:/data danielfett/markdown2rfc main.md
+```
