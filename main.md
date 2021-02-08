@@ -73,7 +73,7 @@ TODO SVG
 
 Figure 1 presents an abstract diagram of the flow followed to obtain an access token and access a protected resource.
 
-(A) The frontent presents to the backend a request for an access token for a given resource server
+(A) The frontend presents to the backend a request for an access token for a given resource server
 (B) If the backend does not already have a suitable access token obtained in previous flows and cached, it requests to the authorization server a new access token with the required characteristics, using any artifacts previousy obtained (eg refresh token) and grants that will allow the authorization server to issue the requested token without requiring user interaction.
 (C) The authorization server returns the requested token and any additional information according to the grant used (eg validity, actual scopes granted, etc) 
 (D) The backend returns the requested access token to the frontend
@@ -124,7 +124,7 @@ The frontend requests an access token to the backend by specifying the requireme
 * `resource` : The identifier of the desired resource server, as defined in [@RFC8707]. This parameter is OPTIONAL.
 * `scope` : The scope of the access request resulting in the desired access token. This parameter follows the syntax described in section 4.1.1 of [@RFC6749]. This parameter is OPTIONAL.
 
-Both parameters MAY be absent from the request. Given that the frontent and the backend are components of the same application, it is possible in some scenarios for the backend to determine what token to return to the frontend without any specific requirement. For example, the application might be consuming only one resource, with a fixed set of scopes: that would make specifying that information in the request from the frontend unnecessary. 
+Both parameters MAY be absent from the request. Given that the frontend and the backend are components of the same application, it is possible in some scenarios for the backend to determine what token to return to the frontend without any specific requirement. For example, the application might be consuming only one resource, with a fixed set of scopes: that would make specifying that information in the request from the frontend unnecessary. 
 
 The following is an example of request where both resource and scopes are specified.
 ```
@@ -136,7 +136,7 @@ Note that the request does not need to specify any client attributes, as those a
 
 ## Access Token Response {#ATresp}
 
-If the backend successfully obtains a suitable token, or has one already cached, it returns it to the frontent in a message featuring the following parameters.
+If the backend successfully obtains a suitable token, or has one already cached, it returns it to the frontend in a message featuring the following parameters.
 
 * `access_token` : The requested access token. This parameter is REQUIRED.
 * `expires_in` : The lifetime in seconds of the access token, as defined in section 4.2.2 of [@RFC6749]. This parameter is REQUIRED.
@@ -154,7 +154,7 @@ The following is an example of access token response.
        "scope":"buy"
      }
 ```
-Note that if the backend elects to cache tokens, to serve future requests from the frontent without contacting the authorization server if still within the useful lifetime, it must also cache expiration information and scopes in accordance to the requirements expressed in this section.
+Note that if the backend elects to cache tokens, to serve future requests from the frontend without contacting the authorization server if still within the useful lifetime, it must also cache expiration information and scopes in accordance to the requirements expressed in this section.
 
 ## Errors {#ATError}
 
@@ -177,12 +177,12 @@ If the backend request to the authorization server fails, the backend will retur
 
 # Requesting Session Information from the Backend {#requestingSessionInfo}
 
-Application developers will often need to obtain information about the current session (such as user attributes, session expiration, etc) to display it to the end user, drive application behavior and any other operation it would perform if the frontend would be in charge of obtaining tokens directly. In the topology described in this specification, most of the user experience is driven by the frontent: however, the session information is inaccessible to the user agent, as it is either kept in artifacts that the user agent cannot inspect (opaque sessions cookies) or on the backend side. 
+Application developers will often need to obtain information about the current session (such as user attributes, session expiration, etc) to display it to the end user, drive application behavior and any other operation it would perform if the frontend would be in charge of obtaining tokens directly. In the topology described in this specification, most of the user experience is driven by the frontend: however, the session information is inaccessible to the user agent, as it is either kept in artifacts that the user agent cannot inspect (opaque sessions cookies) or on the backend side. 
 The .well-known/bff-sessioninfo endpoint is meant to restore the developer's ability to access the session information they need, without compromising the security of the solution. At any time, the frontend can leverage the current secure session to send to the `bff-sessioninfo` endpoint a request, and receive the required session information. The following sections provide details on request and response messages.
 
 ## Session Information Request
 
-The frontent sends a request for session information via an HTTP GET, thru a TLS protected channel and in the context of a secure session. The request has no parameters.
+The frontend sends a request for session information via an HTTP GET, thru a TLS protected channel and in the context of a secure session. The request has no parameters.
 The following is an example of session information request.
 ```
   GET /.well-known/bff-sessioninfo
@@ -227,7 +227,7 @@ I wanted to thank the Academy, the viewers at home, etc
 
 # Security Considerations {#Security}
       
-The simplicity of the described pattern notwithstanding, there are a number of important considerations that frontent, backend and SDK implementers should keep in mind while implementing this approach.  
+The simplicity of the described pattern notwithstanding, there are a number of important considerations that frontend, backend and SDK implementers should keep in mind while implementing this approach.  
 
 ## Frontends should not cache access tokens in local storage
 
@@ -245,7 +245,7 @@ If the token cached by the authorization server features a superset of the scope
 
 ## Resource server colocated with the backend
 
-If the only API invoked by the frontent happens to be colocated with the backend, the frontend doesn't need to obtain access tokens to it: it can simply use the same secure session leveraged to protect requests to the token endpoints described here. The `bff-token` isn't necessary in that scenario, although `bff-sessioninfo` retains its usefulness to surface session and user information to the user agent code. Also note that the presence of the `bff-token` endpoint makes it possible to easily accommodate possible future evolutions where the frontend needs to invoke APIs protected by resource servers hosted elsewhere, without engendering changes in the security property of the application.
+If the only API invoked by the frontend happens to be colocated with the backend, the frontend doesn't need to obtain access tokens to it: it can simply use the same secure session leveraged to protect requests to the token endpoints described here. The `bff-token` isn't necessary in that scenario, although `bff-sessioninfo` retains its usefulness to surface session and user information to the user agent code. Also note that the presence of the `bff-token` endpoint makes it possible to easily accommodate possible future evolutions where the frontend needs to invoke APIs protected by resource servers hosted elsewhere, without engendering changes in the security property of the application.
 
 
 TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frotnend byght need to tell more than scopes to the backend. In that case, just add custom params and stir.
