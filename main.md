@@ -253,4 +253,12 @@ TODO We mentioed another thing, but I can't remember now.
 
 
 {backmatter}
-{{documenthistory.md}}
+
+
+# Document History
+
+   [[ To be removed from the final specification ]]
+
+   -00
+
+   * Literally willed into existence by a long haired gentleman from the Seattle area
