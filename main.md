@@ -5,7 +5,6 @@ ipr = "trust200902"
 area = "Security"
 workgroup = "Web Authorization Protocol"
 keyword = ["security", "oauth2", "openid connect", "SAML"]
-date = 2021-02-07T11:30:00Z
 
 [seriesInfo]
 name = "Internet-Draft"
