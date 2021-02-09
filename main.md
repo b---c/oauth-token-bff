@@ -43,7 +43,7 @@ A large portion of today's development stacks, practices and tools for the web t
 An important aspect of apps running in the user agent is their reliance on API, served from the app's own backend component or from third party providers on disparate domains. Whenever those API are secured according to the (OAuth2 Bearer Token Usage)[@!RFC6750], the user agent app needs to obtain suitable access tokens: however, the task of implementing an OAuth2 [@!RFC6749] client executing in a user agent is complicated by the many security challenges inherent in the browser platform. The original OAuth2 [@!RFC6749] provided guidance dedicated to user agent apps in section 4.2, via the implicit grant. The approach proved to suffer from too many challenges, however, leading subsequent documents (such as the OAuth2 security BCP and OAuth2.1) to recommend a more secure approach based on the authorization code grant with PKCE, and relying on additional security measures such as refresh token rotation and sender constraint. TODO fix the references/language
 Even the new guidance doesn't entirely eliminate some of the inherent risks of implementing an OAuth2 client in a user agent. For example, offering an acceptable experience for continuous use of the app typically requires to persist tokens in local storage or to use development patterns that are too complex for the average developer to implement effectively.    
 In the attempt to avoid those limitations, developers are increasingly pusuing approaches where their backend components (when available) play a more active role. For example, there are many solutions where the backend takes care of obtaining tokens from the authorization server, using classic confidential client grants, and provides a facade for every API the frontend needs to invoke: in that way, the frontend can simply call the API via facade, securing communications with its backend using mainstream methods such as any cookie based web sign on technology. 
-That approach is not always viable, as in the absence of reverse proxy deployments the creation and maintenance of a facade for multiple API can be expensive. As a result, is is increasibly common practice to use a simpler solution: rely on the backend component for obtaining tokens from the authorization server, and sending back to the frontend the resuling access tokens for direct frontend to API communication. As long as the mechanism used for transmitting tokens from the backend to the frontend is secure, the approach is viable: however leaving the details of its implementation to every application and stack developer results in the impossibility to have frontend and backend development stacks to interoperate out of the box. Furthermore, there are a number of security considerations that, if disregarded in the implementation of the pattern, might lead to elevation of privilege attacks and other challenges.  
+That approach is not always viable, as in the absence of reverse proxy deployments the creation and maintenance of a facade for multiple API can be expensive. As a result, is is increasingly common practice to use a simpler solution: rely on the backend component for obtaining tokens from the authorization server, and sending back to the frontend the resulting access tokens for direct frontend to API communication. As long as the mechanism used for transmitting tokens from the backend to the frontend is secure, the approach is viable: however leaving the details of its implementation to every application and stack developer results in the impossibility to have frontend and backend development stacks to interoperate out of the box. Furthermore, there are a number of security considerations that, if disregarded in the implementation of the pattern, might lead to elevation of privilege attacks and other challenges.  
 This documents provides detailed guidance on how to implement the pattern in which a frontend component can delegate token acquisition to its backend component. By offering precise guidance on details such as endpoints and messages format for each operation, this specification will allow developers to create and consume off the shelf components that will easily interoperate and easily mix and match different frontend and backend SDKs, making it possible to author single page apps consuming API on arbitrary domains without suffering any of the security compromises normally associated to a frontend-only approach. 
 Given that the pattern described here does not provide any artifact that the frontend can use to obtain session information such as user attributes, something traditional approaches to user agent apps developent do afford, this document also provides a mechanism for the frontend to obtain session information from the backend.
 
@@ -114,7 +114,7 @@ TODO more granular error refs
 (2) The backend examines the request, validating whether it includes a valid user session: if it doesn't, it rejects the request as described in (#ATErrorInvalidSession). 
 (3) The backend extracts user information from the session, using whatever mechanism it deems suitable, and verifies whether it already has in storage a suitable access token satisfying the request (see (#Security) for more details). If it does, it returns it as described in (5).
 (4) If there is no suitable access token stored, the backend verifies whether it has the necessary artifacts to request it to the authorization server without requiring user interaction- for example, by using a refresh token previously stored for the current user. If it does, the backed contacts the authorization server with a token request using the grant of choice (leg B of the diagram). In the absence of a suitable artifact required to perform a request toward the authorization server, the backend returns an error to the frontend as described in (#ATErrorNoRT).
-(5) If the authorization server returns the requested token as expexcted (leg C in figure 1), the backend returns it to the frontend, as shown in Leg D and described in (#ATresp). If the authorization server denies the request, the backend returns an error to the forntend as described in (#ATErrorFailedGrant).
+(5) If the authorization server returns the requested token as expexcted (leg C in figure 1), the backend returns it to the frontend, as shown in Leg D and described in (#ATresp). If the authorization server denies the request, the backend returns an error to the frontend as described in (#ATErrorFailedGrant).
 The following sections provide more details for each of the messages described.
 
 ## Access Token Request {#ATreq}
@@ -158,14 +158,14 @@ Note that if the backend elects to cache tokens, to serve future requests from t
 
 ## Errors {#ATError}
 
-When the backend fails to deliver to the frontend the requeste token, it responds with an HTTP 400 (Bad Request) status code and includes the following parameters with the response:
+When the backend fails to deliver to the frontend the requested token, it responds with an HTTP 400 (Bad Request) status code and includes the following parameters with the response:
 
 * `error` : An ASCII error code identifying the circumstances of the error. See the next sections for details. This parameter is REQUIRED.
 * `error_description` : OPTIONAL. A human-readable message describing the error for troubleshooting purposes.
 
 ### No valid session found {#ATErrorInvalidSession}  
 
-All requests to the backend MUST be performend in the context of a valid authenticated session, typically by presenting a session cookie over a TLS channel. If the backend cannot find or validate a session, it must reject the request and return a message as described in (#ATError), with an error parameter value of `invalid_session`.  
+All requests to the backend MUST be performed in the context of a valid authenticated session, typically by presenting a session cookie over a TLS channel. If the backend cannot find or validate a session, it must reject the request and return a message as described in (#ATError), with an error parameter value of `invalid_session`.  
 
 ### Backend cannot perform a request to the authorization server {#ATErrorNoRT}
 
@@ -173,7 +173,7 @@ If the backend doesn't have the necessary artifacts (eg a refresh token for the 
 
 ### The backend request to the authorization server fails {#ATErrorFailedGrant}
 
-If the backend request to the authorization server fails, the backend will return to the frontend a message as described in (#ATError), with as error parameter value the error parameter received in the authorization server response (as deescribed by section 5.2 of [@RFC6749] and, if present in the authorizations server response, will include the error_description parameter with the same parameter value as received by the authorization server. TODO wow this sentence is ugly.
+If the backend request to the authorization server fails, the backend will return to the frontend a message as described in (#ATError), with as error parameter value the error parameter received in the authorization server response (as described by section 5.2 of [@RFC6749] and, if present in the authorizations server response, will include the error_description parameter with the same parameter value as received by the authorization server. TODO wow this sentence is ugly.
 
 # Requesting Session Information from the Backend {#requestingSessionInfo}
 
@@ -213,7 +213,7 @@ The following is a non-normative example of successful session information respo
 ```
 It is worth noting that the backend isn't bound to any specific rule and is free to return any information it deems necessary in this message in the context of the application (frontend and backend) own requirements. 
 ## Error
-In case the frontend sends a request to bff-sessioninfo in thre absence of a valid secure session and/ot thru a TLS secure channel, the backend will return an error as described in (#ATErrorNoRT).
+In case the frontend sends a request to bff-sessioninfo in the absence of a valid secure session and/or through a TLS secure channel, the backend will return an error as described in (#ATErrorNoRT).
 For any other error situation, the backend is free to determine what to signal to the frontend. TODO seems a bit weak... maybe a generic error?
 
 # Acknowledgements {#Acknowledgements}
@@ -222,20 +222,20 @@ I wanted to thank the Academy, the viewers at home, etc
 
 # IANA Considerations {#IANA}
       
-  TODO endpoitns registration, is it here? 
+  TODO endpoints registration, is it here? 
     
 
 # Security Considerations {#Security}
       
 The simplicity of the described pattern notwithstanding, there are a number of important considerations that frontend, backend and SDK implementers should keep in mind while implementing this approach.  
 
-## Frontends should not cache access tokens in local storage
+## Frontend should not cache access tokens in local storage
 
-Part of the reason for which the pattern here described was devised is to help application developers to limit the attack surface of their code excuting in the user agent. Access tokens SHOULD NOT be saved in local storage: they SHOULD be kept in memory, and retrieved anew when necessary from the backend following (#requestingAT). 
+Part of the reason for which the pattern here described was devised is to help application developers to limit the attack surface of their code executing in the user agent. Access tokens SHOULD NOT be saved in local storage: they SHOULD be kept in memory, and retrieved anew when necessary from the backend following (#requestingAT). 
 
 ## Mismatch between security characteristics of token requestor and API caller
 
-Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the access token to them, and use that to drive authorization decisions (eg only applow certain operations if the caller is a confidential client). The pattern described here obtains an access token thru the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication tupe as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
+Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the access token to them, and use that to drive authorization decisions (eg only applow certain operations if the caller is a confidential client). The pattern described here obtains an access token thru the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication type as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
 As there are no standards to express in an access token the nature of the client authentication used in obtaining the token itself, this document does not provide a specific mechanism to influence the authorization server and leaves the task, in the rare cases it might be necessary, to individual implementations.
 
 ## Mismatch between scopes in a request vs cached tokens 
@@ -248,8 +248,8 @@ If the token cached by the authorization server features a superset of the scope
 If the only API invoked by the frontend happens to be colocated with the backend, the frontend doesn't need to obtain access tokens to it: it can simply use the same secure session leveraged to protect requests to the token endpoints described here. The `bff-token` isn't necessary in that scenario, although `bff-sessioninfo` retains its usefulness to surface session and user information to the user agent code. Also note that the presence of the `bff-token` endpoint makes it possible to easily accommodate possible future evolutions where the frontend needs to invoke APIs protected by resource servers hosted elsewhere, without engendering changes in the security property of the application.
 
 
-TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frotnend byght need to tell more than scopes to the backend. In that case, just add custom params and stir.
-TODO We mentioed another thing, but I can't remember now.
+TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frontend might need to tell more than scopes to the backend. In that case, just add custom params and stir.
+TODO We mentioned another thing, but I can't remember now.
 
 
 {backmatter}
