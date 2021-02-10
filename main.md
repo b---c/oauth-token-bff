@@ -59,10 +59,10 @@ This represents the application code executing in the user agent, controlling pr
 The backed represents code executing on a server, in particular on the same domain from where the frontend code has been served. Backedn and frontend are both under the control of the same developer.
 
 - Resource Server  
-This represents a classic OAuth2 resource server as described in Section 1.1 of OAuth2 [@!RFC6749], exposing the API the frontend needs to invoke. See {security} for more details applying to notable cases. 
+This represents a classic OAuth2 resource server as described in Section 1.1 of OAuth2 [@!RFC6749], exposing the API the frontend needs to invoke. See (#Security) for more details applying to notable cases. 
 
 - Authorization Server  
-This represents a classic OAuth2 authorization server as described in Section 1.1 of OAuth2 [@!RFC6749], handling authorization for the API the frontend needs to invoke. This document does not introduce any changes in the standard authorization server behavior, however see {security} for some security considerations that might influence the policies of individual servers. 
+This represents a classic OAuth2 authorization server as described in Section 1.1 of OAuth2 [@!RFC6749], handling authorization for the API the frontend needs to invoke. This document does not introduce any changes in the standard authorization server behavior, however see (#Security)  for some security considerations that might influence the policies of individual servers. 
 
 ## Protocol Flow
 
@@ -235,7 +235,7 @@ Part of the reason for which the pattern here described was devised is to help a
 
 ## Mismatch between security characteristics of token requestor and API caller
 
-Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the access token to them, and use that to drive authorization decisions (eg only applow certain operations if the caller is a confidential client). The pattern described here obtains an access token thru the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication type as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
+Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the acc  ess token to them, and use that to drive authorization decisions (eg only allow certain operations if the caller is a confidential client). The pattern described here obtains an access token through the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication type as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
 As there are no standards to express in an access token the nature of the client authentication used in obtaining the token itself, this document does not provide a specific mechanism to influence the authorization server and leaves the task, in the rare cases it might be necessary, to individual implementations.
 
 ## Mismatch between scopes in a request vs cached tokens 
