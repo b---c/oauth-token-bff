@@ -62,7 +62,7 @@ For what the protocol flow is concerned, the topology can be broken down into fo
 This represents the application code executing in the user agent, controlling presentation and invoking one or more resource servers. 
 
 - Backend  
-The backed represents code executing on a server, in particular on the same domain from where the frontend code has been served. Backedn and frontend are both under the control of the same developer.
+The backed represents code executing on a server, in particular on the same domain from where the frontend code has been served. Backend and frontend are both under the control of the same developer.
 
 - Resource Server  
 This represents a classic OAuth2 resource server as described in Section 1.1 of OAuth2 [@!RFC6749], exposing the API the frontend needs to invoke. See (#Security) for more details applying to notable cases. 
