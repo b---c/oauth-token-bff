@@ -79,12 +79,12 @@ TODO SVG
 
 Figure 1 presents an abstract diagram of the flow followed to obtain an access token and access a protected resource.
 
-(A) The frontend presents to the backend a request for an access token for a given resource server
-(B) If the backend does not already have a suitable access token obtained in previous flows and cached, it requests to the authorization server a new access token with the required characteristics, using any artifacts previousy obtained (eg refresh token) and grants that will allow the authorization server to issue the requested token without requiring user interaction.
-(C) The authorization server returns the requested token and any additional information according to the grant used (eg validity, actual scopes granted, etc) 
-(D) The backend returns the requested access token to the frontend
-(E) The frontend presents the access token to the resource server
-(F) the resource server validates the incoming token and returns the protected resource  
+* (A) The frontend presents to the backend a request for an access token for a given resource server
+* (B) If the backend does not already have a suitable access token obtained in previous flows and cached, it requests to the authorization server a new access token with the required characteristics, using any artifacts previousy obtained (eg refresh token) and grants that will allow the authorization server to issue the requested token without requiring user interaction.
+* (C) The authorization server returns the requested token and any additional information according to the grant used (eg validity, actual scopes granted, etc)
+* (D) The backend returns the requested access token to the frontend
+* (E) The frontend presents the access token to the resource server
+* (F) the resource server validates the incoming token and returns the protected resource
 
 
 
