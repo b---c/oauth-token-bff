@@ -97,20 +97,20 @@ when, and only when, they appear in all capitals, as shown here.
 
 # Endpoints
 
-This specification introduces .well-known/bff-token and .well-known/bff-sessioninfo, two specialized endpoints the backend exposes to the frontend to support token requests and session information queries.
-For the purpose of facilitating the implementation of the pattern with minimal configuration requirements, a default value is defined for both endpoints in form of well known relative paths. The specification also offers the ability to override those defaults, in case of conflicts or other considerations. TODO decide if we need section references.
-Both endpoint are meant to be used by the applications' frontend, and the frontend only. As such, the backend MUST verify the the call is occurring in the context of a secure session (eg by mandating the presence of a valid session cookie, received over an HTTPS channel TODO TLS better?) or reject the request TODO reference to the error section.  
+This specification introduces `bff-token` and `bff-sessioninfo`, two specialized endpoints that the backend exposes to support the frontend in acquiring tokens and user session information.
+For the purpose of facilitating the implementation of the pattern with minimal configuration requirements, these endpoints are published at a ".well-known" location according to RFC 5785 [@!RFC5785].
+Both endpoint are meant to be used by the applications' frontend, and the frontend only. As such, the backend MUST verify the the call is occurring in the context of a secure session (e.g., by mandating the presence of a valid session cookie received via HTTPS).
 
 ## The bff-token Endpoint
 
-The bff-token endpoint is exposed by the backend to allow the frontend to request access tokens. By default, it is exposed on the relative path /well-known/bff-token.
-The backend MUST support the use of the HTTP "GET" method for the bff-token endpoint and MAY support the use of the "POST" method as well. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the bff-token endpoint.
+The `bff-token` endpoint is exposed by the backend to allow the frontend to request access tokens. By default, it is exposed at the well-known relative URI `/.well-known/bff-token`. The `bff-token` endpoint URI MUST use the `https` scheme.
+The backend MUST support the use of the HTTP `GET` method for the `bff-token` endpoint and MAY support the use of the `POST` method as well. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the `bff-token` endpoint.
 
 ## The bff-sessioninfo Endpoint
 
-The bff-sessioninfo endpoint is exposed by the backend to allow the frontend to obtain information about the current user, so that it can be accessed my the presentation code.  
-By default, it is exposed on the relative path /well-known/bff-sessioninfo.
-The backend MUST support the use of the HTTP "GET" method for the bff-sessioninfo endpoint. The backend MUST ignore unrecognized request parameters. See (#requestingSessionInfo) for more details on how to use the bff-token endpoint. 
+The `bff-sessioninfo` endpoint is exposed by the backend to allow the frontend to obtain information about the current user, so that it can be accessed my the presentation code.  
+By default, it is exposed at the well-known relative URI `/.well-known/bff-sessioninfo`.
+The backend MUST support the use of the HTTP `GET` method for the `bff-sessioninfo` endpoint. The backend MUST ignore unrecognized request parameters. See (#requestingSessionInfo) for more details on how to use the `bff-sessioninfo` endpoint. 
 
 # Requesting Access Tokens to the Backend {#requestingAT}
 
