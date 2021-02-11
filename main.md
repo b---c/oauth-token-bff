@@ -58,26 +58,30 @@ Given that the pattern described here does not provide any artifact that the fro
 This document describes how a single page application featuring a backend can obtain tokens from an OAuth2 authorization server to access a resource server, while minimizing reliance on browser features known to suffer from security challenges. 
 For what the protocol flow is concerned, the topology can be broken down into four roles:
 
-- Frontend  
-This represents the application code executing in the user agent, controlling presentation and invoking one or more resource servers. 
+Frontend:  
+: This represents the application code executing in the user agent, controlling presentation and invoking one or more resource servers. 
 
-- Backend  
-The backed represents code executing on a server, in particular on the same domain from where the frontend code has been served. Backend and frontend are both under the control of the same developer.
+Backend:  
+: The backed represents code executing on a server, in particular on the same domain from where the frontend code has been served. Backend and frontend are both under the control of the same developer.
 
-- Resource Server  
-This represents a classic OAuth2 resource server as described in Section 1.1 of OAuth2 [@!RFC6749], exposing the API the frontend needs to invoke. See (#Security) for more details applying to notable cases. 
+Resource Server:  
+: This represents a classic OAuth2 resource server as described in Section 1.1 of OAuth2 [@!RFC6749], exposing the API the frontend needs to invoke. See (#Security) for more details applying to notable cases. 
 
-- Authorization Server  
-This represents a classic OAuth2 authorization server as described in Section 1.1 of OAuth2 [@!RFC6749], handling authorization for the API the frontend needs to invoke. This document does not introduce any changes in the standard authorization server behavior, however see (#Security)  for some security considerations that might influence the policies of individual servers. 
+Authorization Server:  
+: This represents a classic OAuth2 authorization server as described in Section 1.1 of OAuth2 [@!RFC6749], handling authorization for the API the frontend needs to invoke. This document does not introduce any changes in the standard authorization server behavior, however see (#Security)  for some security considerations that might influence the policies of individual servers. 
 
 ## Protocol Flow
 
 This section provides a high level description of the way in which the frontend can obtain and use access tokens with the help of its backend.
 As a prerequisite for the flow described below, the backend MUST have established a secure session with the user agent, so that all requests from that user agent toward the backend occur over HTTPS and carry a valid session artifact (such as a cookie) that the backend can validate. This document does not mandate any specific mechanism to establish and maintain that session. 
 
-TODO SVG
+!---
+~~~ 
+[[ TODO SVG or maybe just go back to good old fashioned ASCII 'art' ]]
+~~~
+!---
+Figure: An abstract diagram of the flow followed to obtain an access token and access a protected resource {#abstract-flow}
 
-Figure 1 presents an abstract diagram of the flow followed to obtain an access token and access a protected resource.
 
 * (A) The frontend presents to the backend a request for an access token for a given resource server
 * (B) If the backend does not already have a suitable access token obtained in previous flows and cached, it requests to the authorization server a new access token with the required characteristics, using any artifacts previousy obtained (eg refresh token) and grants that will allow the authorization server to issue the requested token without requiring user interaction.
@@ -95,18 +99,18 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 [@RFC2119] [@RFC8174] 
 when, and only when, they appear in all capitals, as shown here.
 
-# Endpoints
+# Endpoints {#endpoints}
 
 This specification introduces `bff-token` and `bff-sessioninfo`, two specialized endpoints that the backend exposes to support the frontend in acquiring tokens and user session information.
 For the purpose of facilitating the implementation of the pattern with minimal configuration requirements, these endpoints are published at a ".well-known" location according to RFC 5785 [@!RFC5785].
 Both endpoint are meant to be used by the applications' frontend, and the frontend only. As such, the backend MUST verify the the call is occurring in the context of a secure session (e.g., by mandating the presence of a valid session cookie received via HTTPS).
 
-## The bff-token Endpoint
+## The bff-token Endpoint {#bff-token}
 
 The `bff-token` endpoint is exposed by the backend to allow the frontend to request access tokens. By default, it is exposed at the well-known relative URI `/.well-known/bff-token`. The `bff-token` endpoint URI MUST use the `https` scheme.
 The backend MUST support the use of the HTTP `GET` method for the `bff-token` endpoint and MAY support the use of the `POST` method as well. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the `bff-token` endpoint.
 
-## The bff-sessioninfo Endpoint
+## The bff-sessioninfo Endpoint {#bff-sessioninfo}
 
 The `bff-sessioninfo` endpoint is exposed by the backend to allow the frontend to obtain information about the current user, so that it can be accessed my the presentation code.  
 By default, it is exposed at the well-known relative URI `/.well-known/bff-sessioninfo`.
@@ -114,60 +118,77 @@ The backend MUST support the use of the HTTP `GET` method for the `bff-sessionin
 
 # Requesting Access Tokens to the Backend {#requestingAT}
 
-To obtain an authorization token, the frontend sends a request to the backend via the bff-token endpoint. The flow includes the following steps, as shown in Figure 1 TODO reference
-TODO more granular error refs
-(1) The frontend generates the request and sends it to the bff-token endpoint as described in (#ATreq) (leg A in figure 1).  
-(2) The backend examines the request, validating whether it includes a valid user session: if it doesn't, it rejects the request as described in (#ATErrorInvalidSession). 
-(3) The backend extracts user information from the session, using whatever mechanism it deems suitable, and verifies whether it already has in storage a suitable access token satisfying the request (see (#Security) for more details). If it does, it returns it as described in (5).
-(4) If there is no suitable access token stored, the backend verifies whether it has the necessary artifacts to request it to the authorization server without requiring user interaction- for example, by using a refresh token previously stored for the current user. If it does, the backed contacts the authorization server with a token request using the grant of choice (leg B of the diagram). In the absence of a suitable artifact required to perform a request toward the authorization server, the backend returns an error to the frontend as described in (#ATErrorNoRT).
-(5) If the authorization server returns the requested token as expexcted (leg C in figure 1), the backend returns it to the frontend, as shown in Leg D and described in (#ATresp). If the authorization server denies the request, the backend returns an error to the frontend as described in (#ATErrorFailedGrant).
+To obtain an access token, the frontend makes a request to the backend at the `bff-token` endpoint URI. The flow includes the following steps, as shown in (#abstract-flow).
+
+[[ TODO more granular error refs ]]
+
+1. The frontend generates the request and sends it to the `bff-token` endpoint as described in (#ATreq) (leg A in (#abstract-flow)).
+2. The backend examines the request, validating whether it includes a valid user session: if it doesn't, it rejects the request as described in (#ATErrorInvalidSession). 
+3. The backend extracts user information from the session, using whatever mechanism it deems suitable, and verifies whether it already has in storage a suitable access token satisfying the request (see (#Security) for more details). If it does, it returns it as described in (5).
+4. If there is no suitable access token stored, the backend verifies whether it has the necessary artifacts to request it to the authorization server without requiring user interaction- for example, by using a refresh token previously stored for the current user. If it does, the backed contacts the authorization server with a token request using the grant of choice (leg B in (#abstract-flow)). In the absence of a suitable artifact required to perform a request toward the authorization server, the backend returns an error to the frontend as described in (#ATErrorNoRT).
+5. If the authorization server returns the requested token as expected (leg C in (#abstract-flow)), the backend returns it to the frontend, as shown in Leg D of (#abstract-flow) and described in (#ATresp). If the authorization server denies the request, the backend returns an error to the frontend as described in (#ATErrorFailedGrant).
+
 The following sections provide more details for each of the messages described.
 
 ## Access Token Request {#ATreq}
 
-The frontend requests an access token to the backend by specifying the requirements the resulting token must meet. The main parameters are listed below.
+The frontend requests an access token from the backend by specifying the requirements the resulting token must meet. To do so, the following parameters may be added to to the query component (or request payload in the case of 'POST') of the `/.well-known/bff-token` request URI using the `application/x-www-form-urlencoded` format with a character encoding of UTF-8 as described in Appendix B of [@!RFC6749].
 
-* `resource` : The identifier of the desired resource server, as defined in [@RFC8707]. This parameter is OPTIONAL.
-* `scope` : The scope of the access request resulting in the desired access token. This parameter follows the syntax described in section 4.1.1 of [@RFC6749]. This parameter is OPTIONAL.
+`resource` : 
+: The identifier of the desired resource server, as defined in [@RFC8707]. This parameter is OPTIONAL.
+
+`scope` : 
+: The scope of the access request resulting in the desired access token. This parameter follows the syntax described in section 3.3 of [@!RFC6749]. This parameter is OPTIONAL.
 
 Both parameters MAY be absent from the request. Given that the frontend and the backend are components of the same application, it is possible in some scenarios for the backend to determine what token to return to the frontend without any specific requirement. For example, the application might be consuming only one resource, with a fixed set of scopes: that would make specifying that information in the request from the frontend unnecessary. 
 
 The following is an example of request where both resource and scopes are specified.
 ```
-  GET /.well-known/bff-token?resource=https%3A%2F%2Fapi.example.org%2Fstocks
-    &scope=buy HTTP/1.1
-  Host: myapp.example.com
+GET /.well-known/bff-token?scope=buy+sell
+  &resource=https%3A%2F%2Fapi.example.org%2Fstocks HTTP/1.1
+Host: myapp.example.com
 ```
+
 Note that the request does not need to specify any client attributes, as those are all handled by the backend- and the presence of a pre-existing session provides the context necessary for the backend to select the right settings when crafting requests for the authorization server.
 
 ## Access Token Response {#ATresp}
 
 If the backend successfully obtains a suitable token, or has one already cached, it returns it to the frontend in a message featuring the following parameters.
 
-* `access_token` : The requested access token. This parameter is REQUIRED.
-* `expires_in` : The lifetime in seconds of the access token, as defined in section 4.2.2 of [@RFC6749]. This parameter is REQUIRED.
-* `scope` : The scope of the access token being returned. If the request contained a scope string, and the scope of resulting token is different from the requested value, this parameter is REQUIRED. In all other cases, the presence of scope in the response is OPTIONAL.
-The following is an example of access token response.
-```
- HTTP/1.1 200 OK
-     Content-Type: application/json;charset=UTF-8
-     Cache-Control: no-store
-     Pragma: no-cache
+`access_token` : 
+: The requested access token. This parameter is REQUIRED.
 
-     {
-       "access_token":"2YotnFZFEjr1zCsicMWpAA",
-       "expires_in":3600,
-       "scope":"buy"
-     }
+`expires_in` :
+: The lifetime in seconds of the access token, as defined in section 5.1 of [@!RFC6749]. This parameter is REQUIRED, if the information was made available from the authorization server that originally issued the access token. 
+
+`scope` : 
+: The scope of the access token being returned as list of space-delimited, case-sensitive strings, as defined in Section 3.3 of [@!RFC6749]. If the request contained a scope parameter, and the scope of resulting token is different from the requested value, this parameter is REQUIRED. In all other cases, the presence of scope in the response is OPTIONAL.
+
+The following is an example of access token response.
+
 ```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-cache, no-store
+
+{
+  "access_token":"4bWc0ESC9aCc77LTC8EjR1pCfE4WxfNg",
+  "expires_in":3596,
+  "scope":"buy sell"
+}
+```
+
 Note that if the backend elects to cache tokens, to serve future requests from the frontend without contacting the authorization server if still within the useful lifetime, it must also cache expiration information and scopes in accordance to the requirements expressed in this section.
 
 ## Errors {#ATError}
 
 When the backend fails to deliver to the frontend the requested token, it responds with an HTTP 400 (Bad Request) status code and includes the following parameters with the response:
 
-* `error` : An ASCII error code identifying the circumstances of the error. See the next sections for details. This parameter is REQUIRED.
-* `error_description` : OPTIONAL. A human-readable message describing the error for troubleshooting purposes.
+`error` :
+: An ASCII error code identifying the circumstances of the error. See the next sections for details. This parameter is REQUIRED.
+ 
+`error_description` :
+: OPTIONAL. A human-readable message describing the error for troubleshooting purposes.
 
 ### No valid session found {#ATErrorInvalidSession}  
 
@@ -175,73 +196,88 @@ All requests to the backend MUST be performed in the context of a valid authenti
 
 ### Backend cannot perform a request to the authorization server {#ATErrorNoRT}
 
-If the backend doesn't have the necessary artifacts (eg a refresh token for the current user and/or requested resource) to request a suitable access token to the authorization server without requiring user interaction, it will reject the request and return a message as described in (#ATError), with an error parameter value of `backend_not_ready`.  
+If the backend doesn't have the necessary artifacts (e.g., a refresh token for the current user and/or requested resource) to request a suitable access token to the authorization server without requiring user interaction, it will reject the request and return a message as described in (#ATError), with an error parameter value of `backend_not_ready`.  
 
 ### The backend request to the authorization server fails {#ATErrorFailedGrant}
 
-If the backend request to the authorization server fails, the backend will return to the frontend a message as described in (#ATError), with as error parameter value the error parameter received in the authorization server response (as described by section 5.2 of [@RFC6749] and, if present in the authorizations server response, will include the error_description parameter with the same parameter value as received by the authorization server. TODO wow this sentence is ugly.
+If the backend request to the authorization server fails, the backend will return to the frontend a message as described in (#ATError), with as error parameter value the error parameter received in the authorization server response (as described by section 5.2 of [@!RFC6749] and, if present in the authorizations server response, will include the error_description parameter with the same parameter value as received by the authorization server. [[ TODO wow this sentence is ugly. ]]
 
 # Requesting Session Information from the Backend {#requestingSessionInfo}
 
 Application developers will often need to obtain information about the current session (such as user attributes, session expiration, etc) to display it to the end user, drive application behavior and any other operation it would perform if the frontend would be in charge of obtaining tokens directly. In the topology described in this specification, most of the user experience is driven by the frontend: however, the session information is inaccessible to the user agent, as it is either kept in artifacts that the user agent cannot inspect (opaque sessions cookies) or on the backend side. 
-The .well-known/bff-sessioninfo endpoint is meant to restore the developer's ability to access the session information they need, without compromising the security of the solution. At any time, the frontend can leverage the current secure session to send to the `bff-sessioninfo` endpoint a request, and receive the required session information. The following sections provide details on request and response messages.
+The `/.well-known/bff-sessioninfo` endpoint is meant to restore the developer's ability to access the session information they need, without compromising the security of the solution. At any time, the frontend can leverage the current secure session to send to the `bff-sessioninfo` endpoint a request, and receive the needed session information. The following sections provide details on request and response messages.
 
 ## Session Information Request
 
-The frontend sends a request for session information via an HTTP GET, thru a TLS protected channel and in the context of a secure session. The request has no parameters.
+The frontend sends a request for session information via an HTTP GET, using the `https` scheme in the context of a secure session. The request has no parameters.
 The following is an example of session information request.
+
 ```
-  GET /.well-known/bff-sessioninfo
-  Host: myapp.example.com
+GET /.well-known/bff-sessioninfo HTTP/1.1
+Host: myapp.example.com
 ```
 
 ## Session Information Response
 
-If the request is executed in the context of a secure session and over TLS, the backend returns a JSON object containing any information it deems appropriate to share with the frontend about the content of the session.
-For example, if the session was established via OpenID Connect OIDC TODO reference the response might contain the session and user attribute claims as defined in sections 2 and 5.1 of OIDC.
-The following is a non-normative example of successful session information response.  
+If the request is executed in the context of a secure session, the backend returns a JSON object containing any information it deems appropriate to share with the frontend about the content of the session.
+For example, if the session was established via OpenID Connect [@OIDC] the response might contain the session and user attribute claims as defined in sections 2 and 5.1 of [@OIDC].
+The following is a non-normative example of such a session information response.  
 ```
- HTTP/1.1 200 OK
-     Content-Type: application/json;charset=UTF-8
-     Cache-Control: no-store
-     Pragma: no-cache
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-cache, no-store
 
-     {
-        "iss": "https://as.example.com",
-   "sub": "24400320",
-   "exp": 1311281970,
-   "auth_time": 1311280969,
-   "preferred_username": "johnny",
-   "email_verified: "johnny@foo.com",
-   "given_name": "Jonathan",
-   "family_name" : "Swift"
-     }
+{
+    "iss": "https://as.example.com",
+    "sub": "24400320",
+    "exp": 1311281970,
+    "auth_time": 1311280969,
+    "preferred_username": "johnny",
+    "email_verified: "johnny@foo.com",
+    "given_name": "Jonathan",
+    "family_name" : "Swift"
+}
 ```
-It is worth noting that the backend isn't bound to any specific rule and is free to return any information it deems necessary in this message in the context of the application (frontend and backend) own requirements. 
+It is worth noting that the backend isn't bound to any specific rule and is free to return any information it deems necessary in this message in the context of the application (frontend and backend) own requirements.
+ 
 ## Error
-In case the frontend sends a request to bff-sessioninfo in the absence of a valid secure session and/or through a TLS secure channel, the backend will return an error as described in (#ATErrorNoRT).
-For any other error situation, the backend is free to determine what to signal to the frontend. TODO seems a bit weak... maybe a generic error?
+In case the frontend sends a request to bff-sessioninfo in the absence of a valid secure session, the backend will return an error as described in (#ATErrorNoRT).
+For any other error situation, the backend is free to determine what to signal to the frontend. [[ TODO seems a bit weak... maybe a generic error? ]]
 
 # Acknowledgements {#Acknowledgements}
       
-I wanted to thank the Academy, the viewers at home, etc
+I wanted to thank the Academy, the viewers at home, etc..
 
 # IANA Considerations {#IANA}
       
-  TODO endpoints registration, is it here? 
+This specification requests registration of the following two well-known URIs in the IANA "Well-Known URIs" registry [@IANA.well-known] established by [@!RFC5785].
+
+The bff-token Endpoint
+
+ * URI suffix: bff-token
+ * Change Controller:  IESG
+ * Specification Document:  (#bff-token) [[ of this specification ]]
+ * Related information: (none)
+    
+The bff-sessioninfo Endpoint
+
+ * URI suffix: bff-sessioninfo
+ * Change Controller:  IESG
+ * Specification Document:  (#bff-sessioninfo) [[ of this specification ]]
+ * Related information: (none) 
     
 
 # Security Considerations {#Security}
       
 The simplicity of the described pattern notwithstanding, there are a number of important considerations that frontend, backend and SDK implementers should keep in mind while implementing this approach.  
 
-## Frontend should not cache access tokens in local storage
+## Frontend should not persist access tokens in local storage
 
-Part of the reason for which the pattern here described was devised is to help application developers to limit the attack surface of their code executing in the user agent. Access tokens SHOULD NOT be saved in local storage: they SHOULD be kept in memory, and retrieved anew when necessary from the backend following (#requestingAT). 
+Part of the reason for which the pattern herein described was devised is to help application developers to limit the attack surface of their code executing in the user agent. Access tokens SHOULD NOT be saved in local storage: they SHOULD be kept in memory, and retrieved anew when necessary from the backend following (#requestingAT). 
 
 ## Mismatch between security characteristics of token requestor and API caller
 
-Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the acc  ess token to them, and use that to drive authorization decisions (eg only allow certain operations if the caller is a confidential client). The pattern described here obtains an access token through the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication type as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
+Some authorization servers might express in their access tokens whether the client obtaining it authenticated itself, or it behaved as a public client. Resource servers might rely on that information to infer the nature and security characteristics of the application presenting the access token to them, and use that to drive authorization decisions (e.g., only allow certain operations if the caller is a confidential client). The pattern described here obtains an access token through the backend, a confidential client, but the access token is ultimately used by code executing in a far less secure environment. Resource servers knowing that their clients will use this pattern SHOULD refrain from using the client authentication type as a factor in authorization decision, or, whenever possible, should use whatever extensions the authorization server of choice offers to signal that the requested access tokens will not be used by a confidential client.
 As there are no standards to express in an access token the nature of the client authentication used in obtaining the token itself, this document does not provide a specific mechanism to influence the authorization server and leaves the task, in the rare cases it might be necessary, to individual implementations.
 
 ## Mismatch between scopes in a request vs cached tokens 
@@ -254,8 +290,39 @@ If the token cached by the authorization server features a superset of the scope
 If the only API invoked by the frontend happens to be colocated with the backend, the frontend doesn't need to obtain access tokens to it: it can simply use the same secure session leveraged to protect requests to the token endpoints described here. The `bff-token` isn't necessary in that scenario, although `bff-sessioninfo` retains its usefulness to surface session and user information to the user agent code. Also note that the presence of the `bff-token` endpoint makes it possible to easily accommodate possible future evolutions where the frontend needs to invoke APIs protected by resource servers hosted elsewhere, without engendering changes in the security property of the application.
 
 
-TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frontend might need to tell more than scopes to the backend. In that case, just add custom params and stir.
-TODO We mentioned another thing, but I can't remember now.
+[[ TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frontend might need to tell more than scopes to the backend. In that case, just add custom params and stir. ]]
+
+[[ TODO We mentioned another thing, but I can't remember now. ]]
+
+
+<reference anchor="OIDC" target="http://openid.net/specs/openid-connect-core-1_0.html">
+  <front>
+    <title>OpenID Connect Core 1.0 incorporating errata set 1</title>
+    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
+      <organization>NRI</organization>
+    </author>
+    <author initials="J." surname="Bradley" fullname="John Bradley">
+      <organization>Ping Identity</organization>
+    </author>
+    <author initials="M." surname="Jones" fullname="Mike Jones">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
+      <organization>Google</organization>
+    </author>
+    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
+      <organization>Salesforce</organization>
+    </author>
+   <date day="8" month="Nov" year="2014"/>
+  </front>
+</reference>
+
+<reference anchor="IANA.well-known" target="https://www.iana.org/assignments/well-known-uris">
+ <front>
+   <title>Well-Known URIs</title>
+   <author><organization>IANA</organization></author>
+ </front>
+</reference>
 
 
 {backmatter}
