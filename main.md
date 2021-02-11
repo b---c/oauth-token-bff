@@ -33,7 +33,7 @@ organization="Ping Identity"
 
 .# Abstract 
 
-This document describes how a JavaScript frontend can delegate access tokens acquisition to a backend component. In so doing, the frontend can access resource servers directly without taking on the burden to communicate with the authorization server, cache tokens and perform operations that are fraught with security challenges when executed in a user agent, but safe and well proven when executed by a confidential client running on a backend.
+This document describes how a JavaScript frontend can delegate access token acquisition to a backend component. In so doing, the frontend can access resource servers directly without taking on the burden of communicating with the authorization server, persisting tokens, and performing operations that are fraught with security challenges when executed in a user agent, but are safe and well proven when executed by a confidential client running on a backend.
 
 {mainmatter}
 
