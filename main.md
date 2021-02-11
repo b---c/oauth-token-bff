@@ -104,7 +104,7 @@ Both endpoint are meant to be used by the applications' frontend, and the fronte
 ## The bff-token Endpoint
 
 The bff-token endpoint is exposed by the backend to allow the frontend to request access tokens. By default, it is exposed on the relative path /well-known/bff-token.
-The backend MUST support the use of the HTTP "GET" method for the bff-token endpoint and MAY support the use of the "POST" method as well. Parameters sent without a value MUST be treated as if they were omitted from the request. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the bff-token endpoint. 
+The backend MUST support the use of the HTTP "GET" method for the bff-token endpoint and MAY support the use of the "POST" method as well. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the bff-token endpoint.
 
 ## The bff-sessioninfo Endpoint
 
