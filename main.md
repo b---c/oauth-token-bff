@@ -77,7 +77,42 @@ As a prerequisite for the flow described below, the backend MUST have establishe
 
 !---
 ~~~ 
-[[ TODO SVG or maybe just go back to good old fashioned ASCII 'art' ]]
+
+                [[ TODO SVG maybe someday... ]]
+
+
+                                           +---------------+
+                                           |               |
+                                           | Authorization |
+                                           |     Server    |
+                                           |               |
+                                           +---------------+
+                                             ^          |
+                                             |
+                                                        |
+                                   (B) Token |
+                                    request             | (C) Token
+                                             |              response
+                                                        |
+                                             |          v
+ +-------------+                           +---------------+
+ |             |                           |               |
+ |             |---(A) bff-token request-->|               |
+ |  Frontend   |                           |    Backend    |
+ |             |<--(D) bff-token response--|               |
+ |             |                           |               |
+ +-------------+                           +---------------+
+     ^    |
+     |    |
+     |    |
+     |    |                                      +---------------+
+     |    |                                      |               |
+     |    ----(E) Protected resource request---->|   Resource    |
+     |                                           |    Server     |
+     ------(F) Protected resource response-------|               |
+                                                 |               |
+                                                 +---------------+
+
 ~~~
 !---
 Figure: An abstract diagram of the flow followed to obtain an access token and access a protected resource {#abstract-flow}
