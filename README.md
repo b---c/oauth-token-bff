@@ -1,4 +1,4 @@
-# OAuth BFF 
+# OAuth TMI BFF 
 
 This repository contains the source for the individual draft, `Token Mediating and session Information Backend For Frontend` (name subject to change without notice).
 
