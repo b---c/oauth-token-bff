@@ -278,28 +278,6 @@ It is worth noting that the backend isn't bound to any specific rule and is free
 ## Error
 In case the frontend sends a request to bff-sessioninfo in the absence of a valid secure session, the backend will return an error as described in (#ATErrorNoRT).
 For any other error situation, the backend is free to determine what to signal to the frontend. [[ TODO seems a bit weak... maybe a generic error? ]]
-
-# Acknowledgements {#Acknowledgements}
-      
-I wanted to thank the Academy, the viewers at home, etc..
-
-# IANA Considerations {#IANA}
-      
-This specification requests registration of the following two well-known URIs in the IANA "Well-Known URIs" registry [@IANA.well-known] established by [@!RFC5785].
-
-The bff-token Endpoint
-
- * URI suffix: bff-token
- * Change Controller:  IESG
- * Specification Document:  (#bff-token) [[ of this specification ]]
- * Related information: (none)
-    
-The bff-sessioninfo Endpoint
-
- * URI suffix: bff-sessioninfo
- * Change Controller:  IESG
- * Specification Document:  (#bff-sessioninfo) [[ of this specification ]]
- * Related information: (none) 
     
 
 # Security Considerations {#Security}
@@ -324,6 +302,25 @@ If the token cached by the authorization server features a superset of the scope
 
 If the only API invoked by the frontend happens to be colocated with the backend, the frontend doesn't need to obtain access tokens to it: it can simply use the same secure session leveraged to protect requests to the token endpoints described here. The `bff-token` isn't necessary in that scenario, although `bff-sessioninfo` retains its usefulness to surface session and user information to the user agent code. Also note that the presence of the `bff-token` endpoint makes it possible to easily accommodate possible future evolutions where the frontend needs to invoke APIs protected by resource servers hosted elsewhere, without engendering changes in the security property of the application.
 
+# IANA Considerations {#IANA}
+      
+This specification requests registration of the following two well-known URIs in the IANA "Well-Known URIs" registry [@IANA.well-known] established by [@!RFC5785].
+
+The bff-token Endpoint
+
+ * URI suffix: bff-token
+ * Change Controller:  IESG
+ * Specification Document:  (#bff-token) [[ of this specification ]]
+ * Related information: (none)
+    
+The bff-sessioninfo Endpoint
+
+ * URI suffix: bff-sessioninfo
+ * Change Controller:  IESG
+ * Specification Document:  (#bff-sessioninfo) [[ of this specification ]]
+ * Related information: (none) 
+ 
+ # Miscellaneous
 
 [[ TODO Should we say something about: Requests could be more complicated than just scopes (think RAR) and the frontend might need to tell more than scopes to the backend. In that case, just add custom params and stir. ]]
 
@@ -362,6 +359,9 @@ If the only API invoked by the frontend happens to be colocated with the backend
 
 {backmatter}
 
+# Acknowledgements {#Acknowledgements}
+      
+I wanted to thank the Academy, the viewers at home, etc..
 
 # Document History
 
