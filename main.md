@@ -138,17 +138,22 @@ when, and only when, they appear in all capitals, as shown here.
 
 This specification introduces `bff-token` and `bff-sessioninfo`, two specialized endpoints that the backend exposes to support the frontend in acquiring tokens and user session information.
 For the purpose of facilitating the implementation of the pattern with minimal configuration requirements, these endpoints are published at a ".well-known" location according to RFC 5785 [@!RFC5785].
-Both endpoint are meant to be used by the applications' frontend, and the frontend only. As such, the backend MUST verify the the call is occurring in the context of a secure session (e.g., by mandating the presence of a valid session cookie received via HTTPS).
+Both endpoints are meant to be used by the applications' frontend, and the frontend only. As such, the backend MUST verify the the call is occurring in the context of a secure session (e.g., by mandating the presence of a valid session cookie received via HTTPS).
+The content returned from these two endpoints contains credentials and other sensitive information so MUST also be protected against cross-origin reading of the response data. 
+Preventing successful cross-origin requests in the first place is a strong protection against against cross-origin reads. As such, the endpoints MUST NOT be accessible via CORS and SHOULD have protections in place to prevent Cross-Site Request Forgery. 
+If a cookie is used to maintain the secure session, it SHOULD be marked with `HttpOnly` [@RFC6265] and `SameSite` [@I-D.ietf-httpbis-rfc6265bis].
+Both endpoints return JSON [@!RFC8259] so the response MUST contain a `Content-Type` header with the correct `application/json` value and should also contain a `X-Content-Type-Options` header with a value of `nosniff`.  
+Additional guidance around preventing unauthorized reading of response data can be found in [@Post-Spectre-Web-Dev] where the discussion of Dynamic Subresources is particularly relevant. 
 
 ## The bff-token Endpoint {#bff-token}
 
-The `bff-token` endpoint is exposed by the backend to allow the frontend to request access tokens. By default, it is exposed at the well-known relative URI `/.well-known/bff-token`. The `bff-token` endpoint URI MUST use the `https` scheme.
+The `bff-token` endpoint is exposed by the backend to allow the frontend to request access tokens. It is exposed at the well-known relative URI `/.well-known/bff-token`. The `bff-token` endpoint URI MUST use the `https` scheme.
 The backend MUST support the use of the HTTP `GET` method for the `bff-token` endpoint and MAY support the use of the `POST` method as well. The backend MUST ignore unrecognized request parameters. See (#requestingAT) for more details on how to use the `bff-token` endpoint.
 
 ## The bff-sessioninfo Endpoint {#bff-sessioninfo}
 
 The `bff-sessioninfo` endpoint is exposed by the backend to allow the frontend to obtain information about the current user, so that it can be accessed my the presentation code.  
-By default, it is exposed at the well-known relative URI `/.well-known/bff-sessioninfo`.
+It is exposed at the well-known relative URI `/.well-known/bff-sessioninfo`.
 The backend MUST support the use of the HTTP `GET` method for the `bff-sessioninfo` endpoint. The backend MUST ignore unrecognized request parameters. See (#requestingSessionInfo) for more details on how to use the `bff-sessioninfo` endpoint. 
 
 # Requesting Access Tokens to the Backend {#requestingAT}
@@ -182,13 +187,14 @@ The following is an example of request where both resource and scopes are specif
 GET /.well-known/bff-token?scope=buy+sell
   &resource=https%3A%2F%2Fapi.example.org%2Fstocks HTTP/1.1
 Host: myapp.example.com
+Cookie: super-secure-session=hVQvkyX2IOj36fqIoUQFlBeALbh
 ```
 
 Note that the request does not need to specify any client attributes, as those are all handled by the backend- and the presence of a pre-existing session provides the context necessary for the backend to select the right settings when crafting requests for the authorization server.
 
 ## Access Token Response {#ATresp}
 
-If the backend successfully obtains a suitable token, or has one already cached, it returns it to the frontend in a message featuring the following parameters.
+If the backend successfully obtains a suitable token, or has one already cached, it returns it to the frontend with the following parameters in the payload of the HTTP response using the `application/json` media type as defined by [@!RFC8259].
 
 `access_token` : 
 : The requested access token. This parameter is REQUIRED.
@@ -204,7 +210,12 @@ The following is an example of access token response.
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
+X-Content-Type-Options: nosniff
 Cache-Control: no-cache, no-store
+Cross-Origin-Resource-Policy: same-origin
+Content-Security-Policy: sandbox
+Cross-Origin-Opener-Policy: same-origin
+X-Frame-Options: DENY
 
 {
   "access_token":"4bWc0ESC9aCc77LTC8EjR1pCfE4WxfNg",
@@ -250,6 +261,7 @@ The following is an example of session information request.
 ```
 GET /.well-known/bff-sessioninfo HTTP/1.1
 Host: myapp.example.com
+Cookie: super-secure-session=hVQvkyX2IOj36fqIoUQFlBeALbh
 ```
 
 ## Session Information Response
@@ -260,6 +272,7 @@ The following is a non-normative example of such a session information response.
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
+X-Content-Type-Options: nosniff
 Cache-Control: no-cache, no-store
 
 {
@@ -354,6 +367,17 @@ The bff-sessioninfo Endpoint
    <title>Well-Known URIs</title>
    <author><organization>IANA</organization></author>
  </front>
+</reference>
+
+
+<reference anchor="Post-Spectre-Web-Dev" target="https://www.w3.org/TR/2021/WD-post-spectre-webdev-20210316/">
+  <front>
+    <title>Post-Spectre Web Development (work in progress)</title>
+    <author initials="M." surname="West" fullname="Mike West">
+      <organization>Google</organization>
+    </author>
+   <date day="16" month="March" year="2021"/>
+  </front>
 </reference>
 
 
