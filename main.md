@@ -393,7 +393,7 @@ I wanted to thank the Academy, the viewers at home, etc..
 
    -01
    
-   * 
+   * Added some protections/discussions around CSRF and cross-site reading of sensitive data.   
 
    -00
 
