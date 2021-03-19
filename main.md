@@ -142,7 +142,7 @@ Both endpoints are meant to be used by the applications' frontend, and the front
 The content returned from these two endpoints contains credentials and other sensitive information so MUST also be protected against cross-origin reading of the response data. 
 Preventing successful cross-origin requests in the first place is a strong protection against against cross-origin reads. As such, the endpoints MUST NOT be accessible via CORS and SHOULD have protections in place to prevent Cross-Site Request Forgery. 
 If a cookie is used to maintain the secure session, it SHOULD be marked with `HttpOnly` [@RFC6265] and `SameSite` [@I-D.ietf-httpbis-rfc6265bis].
-Both endpoints return JSON [@!RFC8259] so the response MUST contain a `Content-Type` header with the correct `application/json` value and should also contain a `X-Content-Type-Options` header with a value of `nosniff`.  
+Both endpoints return JSON [@!RFC8259] so the response MUST contain a `Content-Type` header with the correct `application/json` value and SHOULD also contain a `X-Content-Type-Options` header with a value of `nosniff`.
 Additional guidance around preventing unauthorized reading of response data can be found in [@Post-Spectre-Web-Dev] where the discussion of Dynamic Subresources is particularly relevant. 
 
 ## The bff-token Endpoint {#bff-token}
