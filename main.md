@@ -8,7 +8,7 @@ keyword = ["security", "oauth2", "openid connect", "SAML"]
 
 [seriesInfo]
 name = "Internet-Draft"
-value = "draft-bertocci-oauth2-tmi-bff-01"
+value = "draft-bertocci-oauth2-tmi-bff-02"
 stream = "IETF"
 status = "standard"
 
