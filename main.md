@@ -49,7 +49,7 @@ In the attempt to avoid those limitations, developers are increasingly pursuing 
  
 Although the Full BFF approach offers better security, by virtue of keep all tokens out of the user agent, it is not always viable. Depending on the number of users and chattiness of the application, routing every API call thru the backend can be expensive in terms of performance, latency, and service tier of the hosting platform in use; the solution might rely on user agents connecting to API in the same region; the developmnt and hosting stack might not offer a viable product or technology implementing the pattern. For and other reasons, it is increasingly common practice to use a simpler solution: rely on the backend component for obtaining tokens from the authorization server, and sending back to the frontend the resulting access tokens for direct frontend to API communication. As long as the mechanism used for transmitting tokens from the backend to the frontend is secure, the approach is viable: however leaving the details of its implementation to every application and stack developer results in the impossibility to have frontend and backend development stacks to interoperate out of the box. Furthermore, there are a number of security considerations that, if disregarded in the implementation of the pattern, might lead to elevation of privilege attacks and other challenges.
   
-This documents provides detailed guidance on how to implement the pattern in which a frontend component can delegate token acquisition to its backend component. By offering precise guidance on details such as endpoints and messages format for each operation, this specification will allow developers to create and consume off-the-shelf components that will easily interoperate and allow mixing and matching different frontend and backend SDKs, making it possible to author single page apps consuming APIs on arbitrary domains without having to cope with the complexity normally associated to a frontend-only approach.
+This documents provides detailed guidance on how to implement the pattern in which a frontend component can delegate token acquisition to its backend component. By offering precise guidance on details such as endpoints and messages format for each operation, this specification will allow developers to create and consume off-the-shelf components that will easily interoperate and allow mixing and matching different frontend and backend SDKs, making it possible to author single page apps consuming APIs on arbitrary domains without having to cope with the complexity normally associated to a frontend-only approach. The OAuth2 for Browser-Based Apps BCP [@BrowserBCP] hints at both Full BFF and the approach described here, but doesn't provide detailed guidance - this specification doesn't replace the BCP, it just providers more details to facilitate interoperable and well designed implementations. 
 It's important to stress that the approach here described should be considered only when a Full BFF approach is not viable. Whenever it is possible for a solution to keep tokens out of a user agent, a Full BFF approach should be preferred.  
  
 Given that the pattern described here does not provide any artifact that the frontend can use to obtain session information such as user attributes, something traditional approaches to user agent apps development do afford, this document also provides a mechanism for the frontend to obtain session information from the backend.
@@ -381,6 +381,19 @@ The bff-sessioninfo Endpoint
       <organization>Google</organization>
     </author>
    <date day="16" month="March" year="2021"/>
+  </front>
+</reference>
+
+<reference anchor="BrowserBCP" target="https://tools.ietf.org/html/draft-ietf-oauth-browser-based-apps-07">
+  <front>
+    <title>OAuth 2.0 for Browser-Based Apps</title>
+    <author initials="A." surname="Parecki" fullname="Aaron Parecki">
+      <organization>Okta</organization>
+    </author>
+    <author initials="D." surname="Waite" fullname="David Waite">
+      <organization>Ping</organization>
+    </author>
+   <date day="5" month="April" year="2021"/>
   </front>
 </reference>
 
